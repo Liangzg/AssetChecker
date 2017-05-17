@@ -191,6 +191,7 @@ namespace AssetChecker
                 GUILayout.Space(10);
             }
             GUILayout.Space(5);
+
             GUILayout.BeginHorizontal("AS TextArea", GUILayout.MinHeight(20f));
             GUILayout.Toggle(false , "模型名称", "ButtonLeft", GUILayout.MaxWidth(200f));
             GUILayout.Toggle(false, "资源类型", "ButtonMid", GUILayout.MinWidth(100F));

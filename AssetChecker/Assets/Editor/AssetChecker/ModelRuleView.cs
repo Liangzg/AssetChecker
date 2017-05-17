@@ -27,7 +27,7 @@ namespace AssetChecker
             
             foreach (ModelSettingBean msb in modelSettings)
             {
-                isFolderOut[msb] = false;
+                isFolderOut[msb] = true;
             }
         }
 
@@ -36,38 +36,43 @@ namespace AssetChecker
             if(modelSettings == null)   this.Initlizalize();
 
             NGUIEditorTools.DrawHeader("模型规范设置");
-            
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                GUILayout.FlexibleSpace();
+
+                if (GUILayout.Button("Clear", GUILayout.Width(80)))
+                {
+                    if (File.Exists(OverviewSetting.localFilePath))
+                        File.Delete(OverviewSetting.localFilePath);
+                    OverviewSetting.localFilePath = "";
+                }
+
+                if (GUILayout.Button("Load", GUILayout.Width(80)))
+                {
+                    string filePath = EditorUtility.OpenFilePanel("打开", Application.dataPath, "xml");
+                    OverviewSetting.localFilePath = filePath.Replace(Application.dataPath, "Assets");
+                    OverviewSetting.Instance.ReadModelSettings();
+                    this.Initlizalize();
+                }
+                GUILayout.Space(10);
+            }
+
+            GUILayout.Space(5);
+            NGUIEditorTools.DrawSeparator();
+
             if (modelSettings != null)
             {
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
                 for (int i = 0; i < modelSettings.Count; i++)
                 {
-                    GUI.backgroundColor = i % 2 == 1 ? Color.white : new Color(0.8f, 0.8f, 0.8f);
-                    GUILayout.BeginHorizontal("AS TextArea");
-                    GUI.backgroundColor = Color.white;
                     GUILayout.Space(5);
                     drawSetting(modelSettings[i]);
-                    GUILayout.EndVertical();
+                    NGUIEditorTools.DrawSeparator();
                 }
                 GUILayout.EndScrollView();
             }
 
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Clear" , GUILayout.Width(80)))
-            {
-                if(File.Exists(OverviewSetting.localFilePath))
-                    File.Delete(OverviewSetting.localFilePath);
-                OverviewSetting.localFilePath = "";
-            }
-
-            if (GUILayout.Button("Load", GUILayout.Width(80)))
-            {
-                string filePath = EditorUtility.OpenFilePanel("打开", Application.dataPath, "xml");
-                OverviewSetting.localFilePath = filePath.Replace(Application.dataPath, "Assets");
-                OverviewSetting.Instance.ReadModelSettings();
-                this.Initlizalize();
-            }
-
             if (GUILayout.Button("保存"))
             {
                 if (string.IsNullOrEmpty(OverviewSetting.localFilePath))
@@ -95,22 +100,31 @@ namespace AssetChecker
             GUILayout.BeginVertical();
             {
                 bool isFoldOut = true;
+                GUILayout.BeginHorizontal();
                 if (isFolderOut.ContainsKey(modelSetting))
                 {
                     isFoldOut = isFolderOut[modelSetting];
                 }
                 isFolderOut[modelSetting] = EditorGUILayout.Foldout(isFoldOut, modelSetting.AssetDesc);
 
+                GUILayout.FlexibleSpace();
+                if (GUILayout.Button("X", GUILayout.Width(30)))
+                {
+
+                }
+                GUILayout.EndHorizontal();
 
                 if (isFoldOut)
                 {
                     GUILayout.BeginHorizontal();
+                    GUILayout.Space(30);
                     GUILayout.Label("文件类型描述", GUILayout.Width(100F));
                     modelSetting.AssetDesc = GUILayout.TextField(modelSetting.AssetDesc);
                     GUILayout.EndHorizontal();
 
                     GUILayout.BeginHorizontal();
                     {
+                        GUILayout.Space(30);
                         if (GUILayout.Button("文件目录" , GUILayout.Width(100F)))
                             modelSetting.Folder.Add(string.Empty);
 
@@ -135,6 +149,7 @@ namespace AssetChecker
                     GUILayout.EndHorizontal();
 
                     GUILayout.BeginHorizontal();
+                    GUILayout.Space(30);
                     NGUIEditorTools.SetLabelWidth(120F);
                     modelSetting.MaxTriangs = EditorGUILayout.IntSlider(new GUIContent("最大三角面数"), modelSetting.MaxTriangs,
                                                                         0, MaxTriangs );

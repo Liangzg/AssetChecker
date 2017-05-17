@@ -36,14 +36,13 @@ namespace AssetChecker
         void OnGUI()
         {
             int newTab = mTab;
-
             GUILayout.BeginHorizontal();
             if (GUILayout.Toggle(newTab == 0, "模型", "ButtonLeft")) newTab = 0;
             if (GUILayout.Toggle(newTab == 1, "特效", "ButtonMid")) newTab = 1;
-//            if (GUILayout.Toggle(newTab == 2, "贴图", "ButtonMid")) newTab = 2;
-//            if (GUILayout.Toggle(newTab == 3, "4", "ButtonMid")) newTab = 3;
+            //            if (GUILayout.Toggle(newTab == 2, "贴图", "ButtonMid")) newTab = 2;
+            //            if (GUILayout.Toggle(newTab == 3, "4", "ButtonMid")) newTab = 3;
             if (GUILayout.Toggle(newTab == 2, "贴图", "ButtonRight")) newTab = 2;
-            
+
             GUILayout.EndHorizontal();
             //tab切换时初始化相应的分页
             if (mTab != newTab)
@@ -69,11 +68,8 @@ namespace AssetChecker
             }
             GUILayout.EndHorizontal();
 
-
-
-            if(currentPanel != null)
+            if (currentPanel != null)
                 currentPanel.OnGUI();
-
             GUILayout.Space(10);
         }
 

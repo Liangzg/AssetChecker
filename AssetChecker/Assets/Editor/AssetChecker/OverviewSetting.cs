@@ -29,7 +29,7 @@ namespace AssetChecker
 
         private List<SettingBean> mTextureSettings = new List<SettingBean>();
         private List<ModelSettingBean> mModelSettings = new List<ModelSettingBean>();
-        private List<SettingBean> mEffectSettings = new List<SettingBean>();
+        private List<ParticleEffectSettingBean> mEffectSettings = new List<ParticleEffectSettingBean>();
 
         public List<SettingBean> TextureSettings
         {
@@ -43,7 +43,7 @@ namespace AssetChecker
             set { mModelSettings = value; }
         }
 
-        public List<SettingBean> EffectSettings
+        public List<ParticleEffectSettingBean> EffectSettings
         {
             get { return mEffectSettings; }
             set { mEffectSettings = value; }
@@ -73,11 +73,41 @@ namespace AssetChecker
             }
         }
 
+        /// <summary>
+        /// 读取粒子特效设置配置
+        /// </summary>
+        public void ReadParticelEffectSettings()
+        {
+            mEffectSettings.Clear();
+            string configPath = LocalParticleFilePath;
+            if (File.Exists(configPath))
+            {
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.LoadXml(File.ReadAllText(configPath));
+                XmlNode rootEle = xmlDoc.SelectSingleNode("EffectConfigs");
+
+                foreach (XmlNode childNode in rootEle.ChildNodes)
+                {
+                    XmlElement childEle = childNode as XmlElement;
+                    if (childEle == null) continue;
+
+                    ParticleEffectSettingBean msb = new ParticleEffectSettingBean();
+                    msb.Read(childEle);
+                    mEffectSettings.Add(msb);
+                }
+            }
+        }
 
         public static string localFilePath
         {
             get { return EditorPrefs.GetString(Application.dataPath + "ModelSetting", ""); }
             set { EditorPrefs.SetString(Application.dataPath + "ModelSetting", value); }
+        }
+
+        public static string LocalParticleFilePath
+        {
+            get { return EditorPrefs.GetString(Application.dataPath + "ParticleFilePath", ""); }
+            set { EditorPrefs.SetString(Application.dataPath + "ParticleFilePath", value); }
         }
     }
 
@@ -134,7 +164,7 @@ namespace AssetChecker
         }
     }
 
-    #region ------------------------------------------------------
+    #region -----------------------模型设置结构-------------------------------
     public class ModelSettingBean : SettingBean
     {
         public int MaxTriangs;
@@ -160,6 +190,33 @@ namespace AssetChecker
             MaxTriangs = Convert.ToInt32(ele.GetAttribute("MaxTriang"));
             MaxBones = Convert.ToInt32(ele.GetAttribute("MaxBones"));
             MaxTextureSize = Convert.ToInt32(ele.GetAttribute("MaxTextrueSize"));
+        }
+    }
+    #endregion
+
+    #region ---------------------------粒子效果规范-------------------------------------
+    public class ParticleEffectSettingBean : SettingBean
+    {
+        public int MaxMatrials;
+        public int MaxParticels;
+
+        /// <summary>
+        /// 保存模型设置配置
+        /// </summary>
+        public override void Write(XmlDocument doc, XmlElement ele)
+        {
+            base.Write(doc, ele);
+
+            ele.SetAttribute("MaxMatrials", MaxMatrials.ToString());
+            ele.SetAttribute("MaxParticels", MaxParticels.ToString());
+        }
+
+        public override void Read(XmlElement ele)
+        {
+            base.Read(ele);
+
+            MaxMatrials = Convert.ToInt32(ele.GetAttribute("MaxMatrials"));
+            MaxParticels = Convert.ToInt32(ele.GetAttribute("MaxParticels"));
         }
     }
     #endregion
