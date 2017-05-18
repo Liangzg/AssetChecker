@@ -15,18 +15,18 @@ namespace AssetChecker
 
         private int mTab;
         private Vector2 scrollPos;
-        private List<EffectBean> modelList;
+        private List<EffectBean> assetList;
 
         private ParticleEffectRuleView ruleView = new ParticleEffectRuleView();
 
         private int selectAssetType;
         private string[] AssetAllTypes;
 
-        private int sortDc = 1, sortTexture = 1, sortScore = 1;
+        private int sortDc = 1, sortTexture = 1,sortParticles = 1, sortScore = 1;
 
         public void Initizalize()
         {
-            if (modelList != null) return;
+            if (assetList != null) return;
            
             OverviewSetting.Instance.ReadParticelEffectSettings();
             findAllParticleEffects();
@@ -66,7 +66,7 @@ namespace AssetChecker
             }
 
             AssetAllTypes = assetTypeList.ToArray();
-            modelList = new List<EffectBean>();
+            assetList = new List<EffectBean>();
             int curFileIndex = 0;
             foreach (ParticleEffectSettingBean msb in fileMaps.Keys)
             {
@@ -74,19 +74,54 @@ namespace AssetChecker
                 for (int i = 0; i < childFiles.Length; i++)
                 {
                     curFileIndex++;
-                    EditorUtility.DisplayProgressBar("分析中", "正在分析模型数据...", curFileIndex / fileCount);
-//                    EffectBean mb = parseModel(childFiles[i]);
-//                    mb.AssetDesc = msb.AssetDesc;
-//
-//                    mb.TriangleScore = mb.TriangleCount / (float)msb.MaxTriangs;
-//                    mb.BondScore = mb.BondCount / (float)msb.MaxBones;
-//                    mb.Score = (mb.TriangleScore + mb.BondScore) * 0.5f;
-//
-//                    modelList.Add(mb);
+                    EditorUtility.DisplayProgressBar("分析中", "正在分析特效数据...", curFileIndex / fileCount);
+                    EffectBean asset = parseEffectAsset(childFiles[i]);
+                    asset.AssetDesc = msb.AssetDesc;
+
+                    asset.DrawCallScore = asset.DrawCallCount / (float)msb.MaxMatrials;
+                    asset.ParticeScore = asset.ParticelCount/(float) msb.MaxParticels;
+                    asset.Score = (asset.DrawCallScore + asset.ParticeScore) * 0.5f;
+
+                    assetList.Add(asset);
                 }
             }
 
             EditorUtility.ClearProgressBar();
+        }
+
+        /// <summary>
+        /// 分析粒子特效
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        private EffectBean parseEffectAsset(string filePath)
+        {
+            EffectBean eb = new EffectBean();
+            eb.Name = Path.GetFileName(filePath);
+            eb.FilePath = filePath;
+
+            UnityEngine.Object obj = AssetDatabase.LoadAssetAtPath<Object>(filePath);
+            GameObject gObj = GameObject.Instantiate(obj) as GameObject;
+
+            ParticleSystem[] particleArr = gObj.GetComponentsInChildren<ParticleSystem>();
+
+            Dictionary<string , bool> materials = new Dictionary<string, bool>();
+            Dictionary<string, bool> textures = new Dictionary<string, bool>();
+            int particels = 0;
+            for (int i = 0; i < particleArr.Length; i++)
+            {
+                Renderer renderer = particleArr[i].GetComponent<Renderer>();
+                Material mat = renderer.sharedMaterial;
+                materials[mat.name] = true;
+                if(mat.mainTexture != null)
+                    textures[mat.mainTexture.name] = true;
+                particels += particleArr[i].maxParticles;
+            }
+            eb.DrawCallCount = materials.Count;
+            eb.TextureCount = textures.Count;
+            eb.ParticelCount = particels;
+            GameObject.DestroyImmediate(gObj);
+            return eb;
         }
 
         public void OnGUI()
@@ -117,7 +152,7 @@ namespace AssetChecker
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button("刷新", GUILayout.Width(80)))
                 {
-                    
+                    findAllParticleEffects();
                 }
                 GUILayout.Space(10);
             }
@@ -129,42 +164,74 @@ namespace AssetChecker
             if (GUILayout.Toggle(false, "DrawCall数", "ButtonMid", GUILayout.MinWidth(100f)))
             {
                 sortDc *= -1;
+                assetList.Sort((x,y)=>x.DrawCallCount.CompareTo(y.DrawCallCount) * sortDc);
             }
             if (GUILayout.Toggle(false, "贴图数", "ButtonMid", GUILayout.MinWidth(80f)))
             {
                 sortTexture *= -1;
+                assetList.Sort((x , y)=>x.TextureCount.CompareTo(y.TextureCount) * sortTexture);
             }
             if (GUILayout.Toggle(false, "粒子总数", "ButtonMid", GUILayout.MinWidth(100f)))
             {
-                
+                sortParticles *= -1;
+                assetList.Sort((x,y)=>x.ParticelCount.CompareTo(y.ParticelCount) * sortParticles);
             }
-            if (GUILayout.Toggle(false, "规范评分", "ButtonRight", GUILayout.MinWidth(100F)))
+            if (GUILayout.Toggle(false, "综合评分", "ButtonRight", GUILayout.MinWidth(100F)))
             {
                 sortScore *= -1;
+                assetList.Sort((x, y) => x.Score.CompareTo(y.Score) * sortParticles);
             }
             GUILayout.Space(10);
             GUILayout.EndHorizontal();
 
             scrollPos = GUILayout.BeginScrollView(scrollPos);
             int index = 0;
-//            for (int i = 0; i < modelList.Count; i++)
-//            {
-//                if (selectAssetType != 0 && !modelList[i].AssetDesc.Equals(AssetAllTypes[selectAssetType])) continue;
-//
-//                GUI.backgroundColor = index % 2 == 1 ? Color.white : new Color(0.8f, 0.8f, 0.8f);
-//                GUILayout.BeginHorizontal("AS TextArea", GUILayout.MinHeight(20f));
-//                GUI.backgroundColor = Color.white;
-//
-//                drawRow(modelList[i]);
-//
-//                GUILayout.EndHorizontal();
-//                index++;
-//            }
+            for (int i = 0; i < assetList.Count; i++)
+            {
+                if (selectAssetType != 0 && !assetList[i].AssetDesc.Equals(AssetAllTypes[selectAssetType])) continue;
+
+                GUI.backgroundColor = index % 2 == 1 ? Color.white : new Color(0.8f, 0.8f, 0.8f);
+                GUILayout.BeginHorizontal("AS TextArea", GUILayout.MinHeight(20f));
+                GUI.backgroundColor = Color.white;
+
+                drawRow(assetList[i]);
+
+                GUILayout.EndHorizontal();
+                index++;
+            }
             GUILayout.EndScrollView();
         }
 
 
+        private void drawRow(EffectBean asset)
+        {
+            int lv = 0;
+            GUILayout.Label(asset.Name, GUILayout.MaxWidth(200f));
 
+            GUILayout.Space(50);
+            GUILayout.Label(asset.AssetDesc, GUILayout.MinWidth(100f));
+            
+            setGUIColor(asset.DrawCallScore);
+            GUILayout.Label(asset.DrawCallCount.ToString(), GUILayout.MinWidth(100f));
+            GUI.color = Color.white;
+
+            GUILayout.Label(asset.TextureCount.ToString(), GUILayout.MinWidth(80f));
+            GUI.color = Color.white;
+            
+            setGUIColor(asset.ParticeScore);
+            GUILayout.Label(asset.ParticelCount.ToString(), GUILayout.Width(100F));
+
+            lv = GUISetting.CalScoreLevel(asset.Score);
+            GUI.color = GUISetting.ScoreColors[lv];
+            GUILayout.Label(GUISetting.ScoreNames[lv], GUILayout.MinWidth(100F));
+            GUI.color = Color.white;
+        }
+
+        private void setGUIColor(float score)
+        {
+            int lv = GUISetting.CalScoreLevel(score); ;
+            GUI.color = GUISetting.ScoreColors[lv];
+        }
 
         public void OnDestroy()
         {

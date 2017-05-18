@@ -13,13 +13,14 @@ namespace AssetChecker
     /// </summary>
     public class ParticleEffectRuleView : IEditorPanel {
 
-        public const int MaxMatrials = 8;
+        public const int MaxMatrials = 10;
         public const int MaxParticles = 160;
 
         private Vector2 scrollPos = Vector2.zero;
         private Dictionary<SettingBean, bool> isFolderOut = new Dictionary<SettingBean, bool>();
 
         private List<ParticleEffectSettingBean> settings;
+        private List<ParticleEffectSettingBean> removeSettings = new List<ParticleEffectSettingBean>();
 
         public void Initizalize()
         {
@@ -68,6 +69,15 @@ namespace AssetChecker
                     drawSetting(settings[i]);
                     NGUIEditorTools.DrawSeparator();
                 }
+
+                if (removeSettings.Count > 0)
+                {
+                    for (int i = 0; i < removeSettings.Count; i++)
+                    {
+                        settings.Remove(removeSettings[i]);
+                    }
+                    removeSettings.Clear();
+                }
                 GUILayout.EndScrollView();
             }
 
@@ -111,7 +121,7 @@ namespace AssetChecker
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button("X", GUILayout.Width(30)))
                 {
-                    
+                    removeSettings.Add(modelSetting);
                 }
                 GUILayout.EndHorizontal();
 

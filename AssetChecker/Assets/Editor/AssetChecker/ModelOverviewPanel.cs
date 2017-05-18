@@ -208,7 +208,7 @@ namespace AssetChecker
             }
             //            GUILayout.Label("贴图名称", GUILayout.Width(150F));
             GUILayout.Toggle(false, "贴图尺寸", "ButtonMid", GUILayout.MinWidth(100F));
-            if (GUILayout.Toggle(false, "规范评分", "ButtonRight", GUILayout.MinWidth(100F)))
+            if (GUILayout.Toggle(false, "综合评分", "ButtonRight", GUILayout.MinWidth(100F)))
             {
                 sortScore *= -1;
                 modelList.Sort((x, y)=>x.Score.CompareTo(y.Score) * sortScore);
@@ -254,7 +254,7 @@ namespace AssetChecker
             //            GUILayout.Label(model.TextureName , GUILayout.Width(150F));
             GUILayout.Label(string.Format("{0}x{1}" , model.TextureSize.x , model.TextureSize.y) , GUILayout.Width(100F));
 
-            lv = Mathf.Clamp((int)(model.Score * 10) / 3 - 1, 0, 4);
+            lv = GUISetting.CalScoreLevel(model.Score);
             GUI.color = GUISetting.ScoreColors[lv];
             GUILayout.Label(GUISetting.ScoreNames[lv], GUILayout.MinWidth(100F));
             GUI.color = Color.white;
@@ -263,7 +263,7 @@ namespace AssetChecker
 
         private void setGUIColor(float score)
         {
-            int lv = Mathf.Clamp((int)(score * 10) / 3  - 1, 0 , 4);
+            int lv = GUISetting.CalScoreLevel(score);
             GUI.color = GUISetting.ScoreColors[lv];
         }
 

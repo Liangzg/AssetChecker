@@ -18,5 +18,24 @@ namespace AssetChecker
             NGUIText.ParseColor32("590404FF" , 0)
         };
         public static string[] ScoreNames = new[] {"完美", "优秀", "合格", "超标", "你咋不上天了"};
+        /// <summary>
+        /// 计算评分
+        /// </summary>
+        /// <param name="score"></param>
+        /// <returns></returns>
+        public static int CalScoreLevel(float score)
+        {
+            int offset = (int)((score - 1) * 100);
+            offset = offset == 0 ? 1 : offset;
+            offset = offset / Mathf.Abs(offset);  //计算正负
+            int lv = score > 1 ? 1 : 0;
+
+            float offsetScore = Mathf.Abs(score - 1f);
+            if (offsetScore >= 0.29f)   lv = 2;
+            else if (offsetScore >= 0.19f)  lv = 1; 
+
+            lv = 2 + lv*offset;
+            return (int)Mathf.Clamp(lv , 0 , 4);
+        }
     }
 }

@@ -21,6 +21,7 @@ namespace AssetChecker
         private Dictionary<SettingBean , bool> isFolderOut = new Dictionary<SettingBean, bool>();
 
         private List<ModelSettingBean> modelSettings ;
+        private List<ModelSettingBean> removeSettings = new List<ModelSettingBean>();
         public void Initlizalize()
         {
             modelSettings = OverviewSetting.Instance.ModelSettings;
@@ -69,6 +70,15 @@ namespace AssetChecker
                     drawSetting(modelSettings[i]);
                     NGUIEditorTools.DrawSeparator();
                 }
+
+                if (removeSettings.Count > 0)
+                {
+                    for (int i = 0; i < removeSettings.Count; i++)
+                    {
+                        modelSettings.Remove(removeSettings[i]);
+                    }
+                    removeSettings.Clear();
+                }
                 GUILayout.EndScrollView();
             }
 
@@ -110,7 +120,7 @@ namespace AssetChecker
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button("X", GUILayout.Width(30)))
                 {
-
+                    removeSettings.Add(modelSetting);
                 }
                 GUILayout.EndHorizontal();
 
