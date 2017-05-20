@@ -13,8 +13,8 @@ namespace AssetChecker
     /// </summary>
     public class ParticleEffectRuleView : IEditorPanel {
 
-        public const int MaxMatrials = 10;
-        public const int MaxParticles = 160;
+        public const int MaxMatrials = 15;
+        public const int MaxParticles = 500;
 
         private Vector2 scrollPos = Vector2.zero;
         private Dictionary<SettingBean, bool> isFolderOut = new Dictionary<SettingBean, bool>();

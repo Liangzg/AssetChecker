@@ -19,7 +19,7 @@ namespace AssetChecker
 
         private List<ModelBean> modelList;
         private Vector2 scrollPos;
-        private int sortTriangle = 1, sortBond = 1, sortScore = 1;
+        private int sortName = 1, sortTriangle = 1, sortBond = 1, sortScore = 1;
         private int selectAssetType;
 
         private ModelRuleView ruleView = new ModelRuleView();
@@ -193,7 +193,11 @@ namespace AssetChecker
             GUILayout.Space(5);
 
             GUILayout.BeginHorizontal("AS TextArea", GUILayout.MinHeight(20f));
-            GUILayout.Toggle(false , "模型名称", "ButtonLeft", GUILayout.MaxWidth(200f));
+            if (GUILayout.Toggle(false, "模型名称", "ButtonLeft", GUILayout.MaxWidth(200f)))
+            {
+                sortName *= -1;
+                modelList.Sort((x , y) => x.Name.CompareTo(y.Name) * sortName);
+            }
             GUILayout.Toggle(false, "资源类型", "ButtonMid", GUILayout.MinWidth(100F));
             GUILayout.Toggle(false, "顶点数", "ButtonMid", GUILayout.MinWidth(80f));
             if (GUILayout.Toggle(false, "三角面数", "ButtonMid", GUILayout.MinWidth(80f)))

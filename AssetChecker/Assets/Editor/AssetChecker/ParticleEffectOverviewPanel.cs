@@ -22,7 +22,7 @@ namespace AssetChecker
         private int selectAssetType;
         private string[] AssetAllTypes;
 
-        private int sortDc = 1, sortTexture = 1,sortParticles = 1, sortScore = 1;
+        private int sortName = 1, sortDc = 1, sortTexture = 1,sortParticles = 1, sortScore = 1;
 
         public void Initizalize()
         {
@@ -112,9 +112,12 @@ namespace AssetChecker
             {
                 Renderer renderer = particleArr[i].GetComponent<Renderer>();
                 Material mat = renderer.sharedMaterial;
-                materials[mat.name] = true;
-                if(mat.mainTexture != null)
-                    textures[mat.mainTexture.name] = true;
+                if (mat != null)
+                {
+                    materials[mat.name] = true;
+                    if(mat.mainTexture != null)
+                        textures[mat.mainTexture.name] = true;                    
+                }
                 particels += particleArr[i].maxParticles;
             }
             eb.DrawCallCount = materials.Count;
@@ -159,7 +162,11 @@ namespace AssetChecker
             GUILayout.Space(5);
 
             GUILayout.BeginHorizontal("AS TextArea", GUILayout.MinHeight(20f));
-            GUILayout.Toggle(false, "名称", "ButtonLeft", GUILayout.MaxWidth(200f));
+            if (GUILayout.Toggle(false, "名称", "ButtonLeft", GUILayout.MaxWidth(200f)))
+            {
+                sortName *= -1;
+                assetList.Sort((x , y)=>x.Name.CompareTo(y.Name) * sortName);
+            }
             GUILayout.Toggle(false, "资源类型", "ButtonMid", GUILayout.MinWidth(100F));
             if (GUILayout.Toggle(false, "DrawCall数", "ButtonMid", GUILayout.MinWidth(100f)))
             {
