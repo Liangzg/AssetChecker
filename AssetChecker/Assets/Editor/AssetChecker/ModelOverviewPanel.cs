@@ -162,8 +162,8 @@ namespace AssetChecker
             int newTab = mTab;
             GUILayout.BeginHorizontal();
             GUILayout.Space(Screen.width * 0.25f);
-            if (GUILayout.Toggle(newTab == 0, "Overview", "ButtonLeft")) newTab = 0;
-            if (GUILayout.Toggle(newTab == 1, "Setting", "ButtonRight")) newTab = 1;
+            if (GUILayout.Toggle(newTab == 0, "总 览", "ButtonLeft")) newTab = 0;
+            if (GUILayout.Toggle(newTab == 1, "设 置", "ButtonRight")) newTab = 1;
             GUILayout.Space(Screen.width * 0.25f);
             GUILayout.EndHorizontal();
 
@@ -242,8 +242,15 @@ namespace AssetChecker
         private void drawRow(ModelBean model)
         {
             int lv = 0;
-            GUILayout.Label(model.Name , GUILayout.MaxWidth(200f));
-            
+            if (model.FilePath == GUISetting.SelectFilePath)
+                GUI.color = GUISetting.SelectColor;
+
+            if (GUILayout.Button(model.Name, "OL TextField", GUILayout.MaxWidth(200f)))
+            {
+                Selection.activeObject = AssetDatabase.LoadAssetAtPath<Object>(model.FilePath);
+                GUISetting.SelectFilePath = model.FilePath;
+            }
+
             GUILayout.Space(50);
             GUILayout.Label(model.AssetDesc, GUILayout.MinWidth(100f));
 

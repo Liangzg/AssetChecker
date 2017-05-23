@@ -1,32 +1,27 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Xml;
-using AssetChecker;
 using UnityEditor;
+using UnityEngine;
 
 namespace AssetChecker
 {
     /// <summary>
-    /// 粒子效果制作范围
+    /// 贴图设置界面
     /// </summary>
-    public class ParticleEffectRuleView : IEditorPanel {
-
-        public const int MaxMatrials = 15;
-        public const int MaxParticles = 500;
-
+    public class TextureSettingView : IEditorPanel
+    {
         private Vector2 scrollPos = Vector2.zero;
-        private Dictionary<SettingBean, bool> isFolderOut = new Dictionary<SettingBean, bool>();
+        private Dictionary<TextureSettingBean, bool> isFolderOut = new Dictionary<TextureSettingBean, bool>();
 
-        private List<ParticleEffectSettingBean> settings;
-        private List<ParticleEffectSettingBean> removeSettings = new List<ParticleEffectSettingBean>();
+        private List<TextureSettingBean> settings;
+        private List<TextureSettingBean> removeSettings = new List<TextureSettingBean>();
 
         public void Initizalize()
         {
-            settings = OverviewSetting.Instance.EffectSettings;
+            settings = OverviewSetting.Instance.TextureSettings;
 
-            foreach (ParticleEffectSettingBean msb in settings)
+            foreach (TextureSettingBean msb in settings)
             {
                 isFolderOut[msb] = true;
             }
@@ -36,28 +31,28 @@ namespace AssetChecker
         {
             if (settings == null) this.Initizalize();
 
-            NGUIEditorTools.DrawHeader("模型规范设置");
+            NGUIEditorTools.DrawHeader("贴图查询设置");
             using (new EditorGUILayout.HorizontalScope())
             {
                 GUILayout.FlexibleSpace();
 
                 if (GUILayout.Button("清空", GUILayout.Width(80)))
                 {
-                    if (File.Exists(OverviewSetting.LocalParticleFilePath))
-                        File.Delete(OverviewSetting.LocalParticleFilePath);
-                    OverviewSetting.LocalParticleFilePath = "";
+                    if (File.Exists(OverviewSetting.LocalTextureFilePath))
+                        File.Delete(OverviewSetting.LocalTextureFilePath);
+                    OverviewSetting.LocalTextureFilePath = "";
                 }
 
                 if (GUILayout.Button("加载", GUILayout.Width(80)))
                 {
                     string filePath = EditorUtility.OpenFilePanel("打开", Application.dataPath, "xml");
-                    OverviewSetting.LocalParticleFilePath = filePath.Replace(Application.dataPath, "Assets");
-                    OverviewSetting.Instance.ReadParticelEffectSettings();
+                    OverviewSetting.LocalTextureFilePath = filePath.Replace(Application.dataPath, "Assets");
+                    OverviewSetting.Instance.ReadTextureSettings();
                     this.Initizalize();
                 }
                 GUILayout.Space(10);
             }
-            
+
             GUILayout.Space(5);
             NGUIEditorTools.DrawSeparator();
             if (settings != null)
@@ -85,19 +80,19 @@ namespace AssetChecker
 
             if (GUILayout.Button("保存"))
             {
-                if (string.IsNullOrEmpty(OverviewSetting.LocalParticleFilePath))
+                if (string.IsNullOrEmpty(OverviewSetting.LocalTextureFilePath))
                 {
                     string filePath = EditorUtility.SaveFilePanel("保存", Application.dataPath, "new file", "xml");
-                    OverviewSetting.LocalParticleFilePath = filePath.Replace(Application.dataPath, "Assets");
+                    OverviewSetting.LocalTextureFilePath = filePath.Replace(Application.dataPath, "Assets");
                 }
-                this.saveSettingRule(OverviewSetting.LocalParticleFilePath);
+                this.saveSettingRule(OverviewSetting.LocalTextureFilePath);
                 AssetDatabase.Refresh();
                 Debug.Log("Save Success !");
             }
             GUILayout.Space(10);
             if (GUILayout.Button("添加规则"))
             {
-                ParticleEffectSettingBean msb = new ParticleEffectSettingBean();
+                TextureSettingBean msb = new TextureSettingBean();
                 msb.Folder.Add(string.Empty);
                 settings.Add(msb);
             }
@@ -105,7 +100,7 @@ namespace AssetChecker
         }
 
 
-        private void drawSetting(ParticleEffectSettingBean modelSetting)
+        private void drawSetting(TextureSettingBean modelSetting)
         {
             GUILayout.BeginVertical();
             {
@@ -132,7 +127,7 @@ namespace AssetChecker
                     GUILayout.Label("文件类型描述", GUILayout.Width(100F));
                     modelSetting.AssetDesc = GUILayout.TextField(modelSetting.AssetDesc);
                     GUILayout.EndHorizontal();
-                    
+
                     GUILayout.BeginHorizontal();
                     {
                         GUILayout.Space(30);
@@ -160,13 +155,11 @@ namespace AssetChecker
                     GUILayout.EndHorizontal();
 
                     GUILayout.BeginHorizontal();
-                    GUILayout.Space(30);
-                    NGUIEditorTools.SetLabelWidth(120F);
-                    modelSetting.MaxMatrials = EditorGUILayout.IntSlider(new GUIContent("最大材质数"), modelSetting.MaxMatrials,
-                                                                        0, MaxMatrials);
-                    GUILayout.FlexibleSpace();
-                    modelSetting.MaxParticels = EditorGUILayout.IntSlider(new GUIContent("最大粒子数"), modelSetting.MaxParticels,
-                                                                        0,MaxParticles);
+                    {
+                        GUILayout.Space(30);
+                        GUILayout.Label("MipMaps", GUILayout.Width(100F));
+                        modelSetting.MipMaps = GUILayout.Toggle(modelSetting.MipMaps, "开启");
+                    }
                     GUILayout.EndHorizontal();
                 }
 
@@ -181,17 +174,17 @@ namespace AssetChecker
         }
 
         /// <summary>
-        /// 保存模型设置配置
+        /// 保存设置配置
         /// </summary>
         private void saveSettingRule(string filePath)
         {
             XmlDocument xmlDoc = new XmlDocument();
 
-            XmlElement rootEle = xmlDoc.CreateElement("EffectConfigs");
+            XmlElement rootEle = xmlDoc.CreateElement("TextureConfigs");
             for (int i = 0; i < settings.Count; i++)
             {
-                ParticleEffectSettingBean msb = settings[i];
-                XmlElement ele = xmlDoc.CreateElement("EffectSetting");
+                SettingBean msb = settings[i];
+                XmlElement ele = xmlDoc.CreateElement("TextureSetting");
                 msb.Write(xmlDoc, ele);
                 rootEle.AppendChild(ele);
             }
@@ -199,6 +192,4 @@ namespace AssetChecker
             xmlDoc.Save(filePath);
         }
     }
-
 }
-

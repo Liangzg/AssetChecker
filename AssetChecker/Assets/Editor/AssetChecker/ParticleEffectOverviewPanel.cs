@@ -132,8 +132,8 @@ namespace AssetChecker
             int newTab = mTab;
             GUILayout.BeginHorizontal();
             GUILayout.Space(Screen.width * 0.25f);
-            if (GUILayout.Toggle(newTab == 0, "Overview", "ButtonLeft")) newTab = 0;
-            if (GUILayout.Toggle(newTab == 1, "Setting", "ButtonRight")) newTab = 1;
+            if (GUILayout.Toggle(newTab == 0, "总 览", "ButtonLeft")) newTab = 0;
+            if (GUILayout.Toggle(newTab == 1, "设 置", "ButtonRight")) newTab = 1;
             GUILayout.Space(Screen.width * 0.25f);
             GUILayout.EndHorizontal();
 
@@ -213,7 +213,14 @@ namespace AssetChecker
         private void drawRow(EffectBean asset)
         {
             int lv = 0;
-            GUILayout.Label(asset.Name, GUILayout.MaxWidth(200f));
+            if (asset.FilePath == GUISetting.SelectFilePath)
+                GUI.color = GUISetting.SelectColor;
+
+            if (GUILayout.Button(asset.Name, "OL TextField", GUILayout.MaxWidth(200f)))
+            {
+                Selection.activeObject = AssetDatabase.LoadAssetAtPath<Object>(asset.FilePath);
+                GUISetting.SelectFilePath = asset.FilePath;
+            }
 
             GUILayout.Space(50);
             GUILayout.Label(asset.AssetDesc, GUILayout.MinWidth(100f));

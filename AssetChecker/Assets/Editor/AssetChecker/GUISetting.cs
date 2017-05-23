@@ -4,6 +4,9 @@ namespace AssetChecker
 {
     public class GUISetting
     {
+        public static string SelectFilePath;
+        public static Color SelectColor = NGUIText.ParseColor32("0088CCFF", 0);
+
         public const string TOP_BAR_LABEL_STYLE_NAME = "TopBarLabel";
         public const string TOP_BAR_BTN_STYLE_NAME = "TopBarButton";
         public const string TOP_BAR_BG_STYLE_NAME = "TopBarBg";

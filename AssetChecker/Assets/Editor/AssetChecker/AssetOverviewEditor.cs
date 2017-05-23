@@ -15,8 +15,8 @@ namespace AssetChecker
         private string searchFilter = "";
 
         private ModelOverviewPanel modelPanel;
-
         private ParticleEffectOverviewPanel effectPanel;
+        private TextureOverviewPanel texturePanel;
 
         private IEditorPanel currentPanel;
 
@@ -91,6 +91,13 @@ namespace AssetChecker
                         effectPanel.Initizalize();
                     }
                     return effectPanel;
+                case 2:
+                    if (texturePanel == null)
+                    {
+                        texturePanel = new TextureOverviewPanel();
+                        texturePanel.Initizalize();
+                    }
+                    return texturePanel;
             }
             return null;
         }

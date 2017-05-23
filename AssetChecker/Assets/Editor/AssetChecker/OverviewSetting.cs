@@ -27,11 +27,11 @@ namespace AssetChecker
         }
 
 
-        private List<SettingBean> mTextureSettings = new List<SettingBean>();
+        private List<TextureSettingBean> mTextureSettings = new List<TextureSettingBean>();
         private List<ModelSettingBean> mModelSettings = new List<ModelSettingBean>();
         private List<ParticleEffectSettingBean> mEffectSettings = new List<ParticleEffectSettingBean>();
 
-        public List<SettingBean> TextureSettings
+        public List<TextureSettingBean> TextureSettings
         {
             get { return mTextureSettings; }
             set { mTextureSettings = value; }
@@ -97,6 +97,30 @@ namespace AssetChecker
                 }
             }
         }
+        /// <summary>
+        /// 读取贴图的设置
+        /// </summary>
+        public void ReadTextureSettings()
+        {
+            mTextureSettings.Clear();
+            string configPath = LocalTextureFilePath;
+            if (File.Exists(configPath))
+            {
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.LoadXml(File.ReadAllText(configPath));
+                XmlNode rootEle = xmlDoc.SelectSingleNode("TextureConfigs");
+
+                foreach (XmlNode childNode in rootEle.ChildNodes)
+                {
+                    XmlElement childEle = childNode as XmlElement;
+                    if (childEle == null) continue;
+
+                    TextureSettingBean msb = new TextureSettingBean();
+                    msb.Read(childEle);
+                    mTextureSettings.Add(msb);
+                }
+            }
+        }
 
         public static string localFilePath
         {
@@ -108,6 +132,12 @@ namespace AssetChecker
         {
             get { return EditorPrefs.GetString(Application.dataPath + "ParticleFilePath", ""); }
             set { EditorPrefs.SetString(Application.dataPath + "ParticleFilePath", value); }
+        }
+
+        public static string LocalTextureFilePath
+        {
+            get { return EditorPrefs.GetString(Application.dataPath + "TextureFilePath", ""); }
+            set { EditorPrefs.SetString(Application.dataPath + "TextureFilePath", value); }
         }
     }
 
@@ -217,6 +247,32 @@ namespace AssetChecker
 
             MaxMatrials = Convert.ToInt32(ele.GetAttribute("MaxMatrials"));
             MaxParticels = Convert.ToInt32(ele.GetAttribute("MaxParticels"));
+        }
+    }
+    #endregion
+
+    #region ---------------------------粒子效果规范-------------------------------------
+    public class TextureSettingBean : SettingBean
+    {
+        public bool MipMaps;
+
+        /// <summary>
+        /// 保存模型设置配置
+        /// </summary>
+        public override void Write(XmlDocument doc, XmlElement ele)
+        {
+            base.Write(doc, ele);
+
+            ele.SetAttribute("MipMaps", MipMaps.ToString());
+        }
+
+        public override void Read(XmlElement ele)
+        {
+            base.Read(ele);
+
+            string minmaps = ele.GetAttribute("MipMaps");
+            if(!string.IsNullOrEmpty(minmaps))
+                MipMaps = Convert.ToBoolean(minmaps);
         }
     }
     #endregion

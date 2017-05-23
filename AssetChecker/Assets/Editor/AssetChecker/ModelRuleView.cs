@@ -41,14 +41,14 @@ namespace AssetChecker
             {
                 GUILayout.FlexibleSpace();
 
-                if (GUILayout.Button("Clear", GUILayout.Width(80)))
+                if (GUILayout.Button("清空", GUILayout.Width(80)))
                 {
                     if (File.Exists(OverviewSetting.localFilePath))
                         File.Delete(OverviewSetting.localFilePath);
                     OverviewSetting.localFilePath = "";
                 }
 
-                if (GUILayout.Button("Load", GUILayout.Width(80)))
+                if (GUILayout.Button("加载", GUILayout.Width(80)))
                 {
                     string filePath = EditorUtility.OpenFilePanel("打开", Application.dataPath, "xml");
                     OverviewSetting.localFilePath = filePath.Replace(Application.dataPath, "Assets");
